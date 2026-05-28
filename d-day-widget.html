@@ -7,9 +7,9 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:transparent;}
 .w{width:300px;padding:1.25rem 1.25rem 1rem;background:#fff;border-radius:16px;border:1px solid #f5d5e0;}
-.name{font-size:17px;font-weight:500;color:#222;margin-bottom:3px;}
-.datestr{font-size:12px;color:#888;margin-bottom:14px;}
-.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:999px;font-size:14px;font-weight:500;background:#F4C0D1;color:#72243E;margin-bottom:14px;}
+.name{font-size:17px;font-weight:500;color:#72243E;margin-bottom:3px;}
+.datestr{font-size:12px;color:#D4537E;margin-bottom:12px;}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:999px;font-size:14px;font-weight:500;background:#F4C0D1;color:#72243E;margin-bottom:12px;}
 .row{display:flex;gap:8px;}
 .box{flex:1;background:#FBEAF0;border-radius:10px;padding:10px 6px 8px;text-align:center;}
 .num{font-size:24px;font-weight:500;color:#993556;line-height:1;margin-bottom:3px;}
@@ -18,8 +18,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:
 </head>
 <body>
 <div class="w">
-  <p class="name">🎂 생일</p>
-  <p class="datestr">2026년 6월 27일</p>
+  <p class="name" id="nm">이벤트</p>
+  <p class="datestr" id="ds"></p>
   <div class="badge" id="dd">D-?</div>
   <div class="row">
     <div class="box"><div class="num" id="dy">—</div><div class="lbl">days</div></div>
@@ -28,16 +28,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:
   </div>
 </div>
 <script>
-function upd(){
-  var t=new Date('2026-06-27T00:00:00'),now=new Date(),ms=t-now;
-  var dd=Math.ceil(ms/864e5);
-  document.getElementById('dd').textContent=dd===0?'D-Day!':dd>0?'D-'+dd:'D+'+Math.abs(dd);
-  var abs=Math.abs(ms);
-  document.getElementById('dy').textContent=Math.floor(abs/864e5);
-  document.getElementById('hr').textContent=Math.floor(abs%864e5/36e5);
-  document.getElementById('mn').textContent=Math.floor(abs%36e5/6e4);
+var p=new URLSearchParams(location.search);
+var name=p.get('name')||'이벤트';
+var repeat=p.get('repeat')==='1';
+var dateVal=p.get('date')||'';
+var md=p.get('md')||'';
+document.getElementById('nm').textContent=name;
+function getTarget(){
+  if(repeat&&md){
+    var parts=md.split('-');
+    var now=new Date();
+    var t=new Date(now.getFullYear(),parseInt(parts[0])-1,parseInt(parts[1]));
+    if(t<now&&t.toDateString()!==now.toDateString()) t.setFullYear(t.getFullYear()+1);
+    return t;
+  }
+  return dateVal?new Date(dateVal+'T00:00:00'):null;
 }
-upd();setInterval(upd,30000);
+var target=getTarget();
+if(target){
+  document.getElementById('ds').textContent=(repeat?'다음 → ':'')+target.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+  function upd(){
+    var t=getTarget(),now=new Date(),ms=t-now;
+    var dd=Math.ceil(ms/864e5);
+    document.getElementById('dd').textContent=dd===0?'D-Day!':dd>0?'D-'+dd:'D+'+Math.abs(dd);
+    var abs=Math.abs(ms);
+    document.getElementById('dy').textContent=Math.floor(abs/864e5);
+    document.getElementById('hr').textContent=Math.floor(abs%864e5/36e5);
+    document.getElementById('mn').textContent=Math.floor(abs%36e5/6e4);
+  }
+  upd();setInterval(upd,30000);
+}
 </script>
 </body>
 </html>
