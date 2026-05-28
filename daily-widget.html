@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Planner</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #ffe4ee 0%, #ffd6e7 30%, #ffc8e0 60%, #ffb3d9 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .widget {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow:
+        0 8px 32px rgba(255, 105, 150, 0.15),
+        0 2px 8px rgba(255, 105, 150, 0.08);
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #ff85a1 0%, #ff6b9d 50%, #f953c6 100%);
+      padding: 24px 28px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 120px;
+      height: 120px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 50%;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      right: 40px;
+      width: 70px;
+      height: 70px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+    }
+
+    .date-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .day-number {
+      font-size: 64px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+      text-shadow: 0 2px 8px rgba(200, 0, 80, 0.2);
+    }
+
+    .date-info {
+      padding-bottom: 6px;
+    }
+
+    .day-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.95);
+      letter-spacing: 0.5px;
+    }
+
+    .month-year {
+      font-size: 13px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.78);
+      margin-top: 2px;
+    }
+
+    .greeting {
+      margin-top: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.18);
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Events Body ── */
+    .body {
+      padding: 20px 24px 24px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #e75480;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    /* ── Config Banner ── */
+    .config-banner {
+      background: linear-gradient(135deg, #fff0f5, #ffe0ef);
+      border: 1.5px dashed #ffaacc;
+      border-radius: 16px;
+      padding: 18px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .config-banner p {
+      font-size: 13px;
+      color: #c45b80;
+      line-height: 1.6;
+    }
+
+    .config-banner code {
+      background: rgba(255, 105, 150, 0.12);
+      border-radius: 6px;
+      padding: 1px 6px;
+      font-family: monospace;
+      font-size: 11.5px;
+      color: #d63870;
+      word-break: break-all;
+    }
+
+    /* ── Event Item ── */
+    .event-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .event-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 16px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255, 182, 210, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .event-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      border-radius: 16px 0 0 16px;
+    }
+
+    .event-item.color-0::before { background: #ff6b9d; }
+    .event-item.color-1::before { background: #f953c6; }
+    .event-item.color-2::before { background: #ff85a1; }
+    .event-item.color-3::before { background: #e75480; }
+    .event-item.color-4::before { background: #ffb3d4; }
+    .event-item.color-5::before { background: #ff4488; }
+    .event-item.color-6::before { background: #c45b80; }
+    .event-item.color-7::before { background: #fa7bba; }
+
+    .event-item:hover {
+      transform: translateX(2px);
+      box-shadow: 0 4px 16px rgba(255, 105, 150, 0.15);
+    }
+
+    .event-time {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 48px;
+      padding-left: 4px;
+    }
+
+    .time-start {
+      font-size: 13px;
+      font-weight: 700;
+      color: #e75480;
+    }
+
+    .time-end {
+      font-size: 10.5px;
+      font-weight: 400;
+      color: #c490a0;
+      margin-top: 1px;
+    }
+
+    .time-allday {
+      font-size: 11px;
+      font-weight: 700;
+      color: #f953c6;
+      background: rgba(249, 83, 198, 0.1);
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
+
+    .event-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .event-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #5a2040;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .event-location {
+      font-size: 11.5px;
+      color: #b07090;
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: 30px 0 10px;
+    }
+
+    .empty-icon {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      color: #c090a8;
+      font-weight: 600;
+    }
+
+    /* ── Loading ── */
+    .loading {
+      text-align: center;
+      padding: 30px 0;
+      color: #e075a0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      border: 3px solid rgba(255, 105, 150, 0.2);
+      border-top-color: #ff6b9d;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 10px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Error ── */
+    .error-msg {
+      background: rgba(255, 100, 130, 0.1);
+      border: 1px solid rgba(255, 100, 130, 0.25);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: #cc3355;
+      line-height: 1.5;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      border-top: 1px solid rgba(255, 182, 210, 0.3);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .refresh-info {
+      font-size: 11px;
+      color: #c890a8;
+    }
+
+    .refresh-btn {
+      background: none;
+      border: 1.5px solid rgba(255, 107, 157, 0.4);
+      color: #e75480;
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: all 0.15s ease;
+    }
+
+    .refresh-btn:hover {
+      background: rgba(255, 107, 157, 0.1);
+      border-color: #ff6b9d;
+    }
+  </style>
+</head>
+<body>
+  <div class="widget">
+    <div class="header">
+      <div class="date-row">
+        <div class="day-number" id="dayNum">--</div>
+        <div class="date-info">
+          <div class="day-name" id="dayName">---</div>
+          <div class="month-year" id="monthYear">---</div>
+        </div>
+      </div>
+      <div class="greeting" id="greeting">✨ 좋은 하루!</div>
+    </div>
+
+    <div class="body">
+      <div class="section-title">오늘의 일정</div>
+      <div id="events-container">
+        <div class="loading">
+          <div class="spinner"></div><br>캘린더 불러오는 중...
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="refresh-info" id="lastUpdated">업데이트 중...</span>
+      <button class="refresh-btn" onclick="loadEvents()">새로고침</button>
+    </div>
+  </div>
+
+  <script>
+    // ──────────────────────────────────────────────
+    //  ★ 여기에 본인 설정값을 입력하세요 ★
+    // ──────────────────────────────────────────────
+    const CONFIG = {
+      // Google Calendar API 키 (Google Cloud Console에서 발급)
+      API_KEY: 'YOUR_API_KEY_HERE',
+      // 캘린더 ID (보통 Google 계정 이메일 주소, 또는 캘린더 설정 > 캘린더 통합 에서 확인)
+      CALENDAR_ID: 'YOUR_CALENDAR_ID_HERE',
+      // 자동 새로고침 간격 (분)
+      REFRESH_MINUTES: 15,
+    };
+    // ──────────────────────────────────────────────
+
+    const DAYS_KO = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+    const MONTHS_KO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+
+    function updateHeader() {
+      const now = new Date();
+      document.getElementById('dayNum').textContent = now.getDate();
+      document.getElementById('dayName').textContent = DAYS_KO[now.getDay()];
+      document.getElementById('monthYear').textContent = `${now.getFullYear()}년 ${MONTHS_KO[now.getMonth()]}`;
+
+      const h = now.getHours();
+      let gr = '🌙 좋은 밤!';
+      if (h >= 5  && h < 12) gr = '🌸 좋은 아침!';
+      else if (h >= 12 && h < 18) gr = '☀️ 좋은 오후!';
+      else if (h >= 18 && h < 22) gr = '🌇 좋은 저녁!';
+      document.getElementById('greeting').textContent = gr;
+    }
+
+    function fmtTime(dateStr) {
+      const d = new Date(dateStr);
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `${hh}:${mm}`;
+    }
+
+    function isConfigured() {
+      return CONFIG.API_KEY !== 'YOUR_API_KEY_HERE' && CONFIG.CALENDAR_ID !== 'YOUR_CALENDAR_ID_HERE';
+    }
+
+    async function loadEvents() {
+      const container = document.getElementById('events-container');
+
+      if (!isConfigured()) {
+        container.innerHTML = `
+          <div class="config-banner">
+            <p>💕 설정이 필요해요!<br><br>
+            아래 가이드를 참고해서<br>
+            <code>CONFIG.API_KEY</code>와 <code>CONFIG.CALENDAR_ID</code>를<br>
+            이 파일에 직접 입력해주세요.<br><br>
+            📖 자세한 방법은 아래 설정 가이드를 확인하세요.</p>
+          </div>`;
+        renderSampleEvents(container);
+        return;
+      }
+
+      container.innerHTML = `<div class="loading"><div class="spinner"></div><br>불러오는 중...</div>`;
+
+      try {
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+        const endOfDay   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString();
+
+        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CONFIG.CALENDAR_ID)}/events`
+          + `?key=${CONFIG.API_KEY}`
+          + `&timeMin=${startOfDay}`
+          + `&timeMax=${endOfDay}`
+          + `&singleEvents=true`
+          + `&orderBy=startTime`
+          + `&maxResults=20`;
+
+        const res = await fetch(url);
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error?.message || `HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        renderEvents(container, data.items || []);
+
+        const t = new Date();
+        document.getElementById('lastUpdated').textContent =
+          `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')} 업데이트`;
+
+      } catch (e) {
+        container.innerHTML = `<div class="error-msg">⚠️ 캘린더를 불러오지 못했어요.<br><small>${e.message}</small></div>`;
+      }
+    }
+
+    function renderEvents(container, events) {
+      if (events.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🌸</div>
+            <p>오늘은 일정이 없어요<br>여유로운 하루 보내세요!</p>
+          </div>`;
+        return;
+      }
+
+      const items = events.map((ev, i) => {
+        const isAllDay = !!ev.start?.date;
+        const title = ev.summary || '(제목 없음)';
+        const loc   = ev.location ? `<div class="event-location">📍 ${ev.location}</div>` : '';
+
+        const timeHtml = isAllDay
+          ? `<div class="event-time"><span class="time-allday">하루종일</span></div>`
+          : `<div class="event-time">
+               <span class="time-start">${fmtTime(ev.start.dateTime)}</span>
+               <span class="time-end">${fmtTime(ev.end.dateTime)}</span>
+             </div>`;
+
+        return `
+          <div class="event-item color-${i % 8}">
+            ${timeHtml}
+            <div class="event-content">
+              <div class="event-title">${title}</div>
+              ${loc}
+            </div>
+          </div>`;
+      }).join('');
+
+      container.innerHTML = `<div class="event-list">${items}</div>`;
+    }
+
+    function renderSampleEvents(container) {
+      const samples = [
+        { time: '09:00', end: '10:00', title: '팀 미팅 ☕', loc: '회의실 A' },
+        { time: '12:00', end: '13:00', title: '점심 약속 🍜', loc: '' },
+        { time: '15:00', end: '16:00', title: '운동 💪', loc: '헬스장' },
+      ];
+
+      const items = samples.map((s, i) => `
+        <div class="event-item color-${i}">
+          <div class="event-time">
+            <span class="time-start">${s.time}</span>
+            <span class="time-end">${s.end}</span>
+          </div>
+          <div class="event-content">
+            <div class="event-title">${s.title}</div>
+            ${s.loc ? `<div class="event-location">📍 ${s.loc}</div>` : ''}
+          </div>
+        </div>`).join('');
+
+      const existing = container.querySelector('.config-banner');
+      if (existing) {
+        const sampleDiv = document.createElement('div');
+        sampleDiv.innerHTML = `
+          <div style="font-size:11px;color:#c890a8;text-align:center;margin-bottom:10px;">— 미리보기 샘플 —</div>
+          <div class="event-list">${items}</div>`;
+        container.appendChild(sampleDiv);
+      }
+    }
+
+    // Init
+    updateHeader();
+    loadEvents();
+    setInterval(loadEvents, CONFIG.REFRESH_MINUTES * 60 * 1000);
+    setInterval(updateHeader, 60 * 1000);
+  </script>
+</body>
+</html>
